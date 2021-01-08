@@ -4,12 +4,11 @@ import (
 	"context"
 
 	networkv1alpha1 "github.com/rancher/harvester-network-controller/pkg/apis/network.harvester.cattle.io/v1alpha1"
-
 	"github.com/rancher/harvester-network-controller/pkg/config"
 )
 
 const (
-	controllerName = "host-controller"
+	controllerName = "host-network-controller"
 )
 
 type Handler struct {

@@ -1,4 +1,4 @@
-package daemonset
+package master
 
 import (
 	"github.com/rancher/harvester-network-controller/pkg/config"

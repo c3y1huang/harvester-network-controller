@@ -58,7 +58,9 @@ spec:
       containers:
         - image: rancher/harvester-network-controller:master-head
           imagePullPolicy: IfNotPresent
-          name: manager
+          name: network
+          command:
+            - harvester-network-controller
           args:
             - manager
           resources:

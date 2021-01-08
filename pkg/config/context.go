@@ -3,10 +3,11 @@ package config
 import (
 	"context"
 
-	ctlharvester "github.com/rancher/harvester/pkg/generated/controllers/harvester.cattle.io"
+	cniv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	ctlcni "github.com/rancher/harvester/pkg/generated/controllers/k8s.cni.cncf.io"
 	"github.com/rancher/lasso/pkg/controller"
 	ctlcore "github.com/rancher/wrangler-api/pkg/generated/controllers/core"
+	wcrd "github.com/rancher/wrangler/pkg/crd"
 	"github.com/rancher/wrangler/pkg/generic"
 	"github.com/rancher/wrangler/pkg/schemes"
 	"github.com/rancher/wrangler/pkg/start"
@@ -16,6 +17,7 @@ import (
 
 	networkv1alpha1 "github.com/rancher/harvester-network-controller/pkg/apis/network.harvester.cattle.io/v1alpha1"
 	ctlnetwork "github.com/rancher/harvester-network-controller/pkg/generated/controllers/network.harvester.cattle.io"
+	"github.com/rancher/harvester-network-controller/pkg/util/crd"
 )
 
 var (
@@ -37,7 +39,6 @@ type Management struct {
 	ctx               context.Context
 	ControllerFactory controller.SharedControllerFactory
 
-	HarvesterFactory        *ctlharvester.Factory
 	HarvesterNetworkFactory *ctlnetwork.Factory
 	CniFactory              *ctlcni.Factory
 	CoreFactory             *ctlcore.Factory
@@ -49,7 +50,11 @@ func (s *Management) Start(threadiness int) error {
 	return start.All(s.ctx, threadiness, s.starters...)
 }
 
-func (s *Management) Register(ctx context.Context, registerFuncList []RegisterFunc) error {
+func (s *Management) Register(ctx context.Context, config *rest.Config, registerFuncList []RegisterFunc) error {
+	if err := createCRDsIfNotExisted(ctx, config); err != nil {
+		return err
+	}
+
 	for _, f := range registerFuncList {
 		if err := f(ctx, s); err != nil {
 			return err
@@ -57,6 +62,28 @@ func (s *Management) Register(ctx context.Context, registerFuncList []RegisterFu
 	}
 
 	return nil
+}
+
+func createCRDsIfNotExisted(ctx context.Context, config *rest.Config) error {
+	factory, err := crd.NewFactoryFromClient(ctx, config)
+	if err != nil {
+		return err
+	}
+	return factory.
+		CreateCRDsIfNotExisted(
+			crd.NonNamespacedFromGV(networkv1alpha1.SchemeGroupVersion, "HostNetwork"),
+		).
+		CreateCRDsIfNotExisted(
+			createNetworkAttachmentDefinitionCRD(),
+		).
+		Wait()
+}
+
+func createNetworkAttachmentDefinitionCRD() wcrd.CRD {
+	nad := crd.FromGV(cniv1.SchemeGroupVersion, "NetworkAttachmentDefinition")
+	nad.PluralName = "network-attachment-definitions"
+	nad.SingularName = "network-attachment-definition"
+	return nad
 }
 
 func SetupManagement(ctx context.Context, restConfig *rest.Config) (*Management, error) {
@@ -73,12 +100,12 @@ func SetupManagement(ctx context.Context, restConfig *rest.Config) (*Management,
 		ctx: ctx,
 	}
 
-	harv, err := ctlharvester.NewFactoryFromConfigWithOptions(restConfig, opts)
+	harvesterNetwork, err := ctlnetwork.NewFactoryFromConfigWithOptions(restConfig, opts)
 	if err != nil {
 		return nil, err
 	}
-	management.HarvesterFactory = harv
-	management.starters = append(management.starters, harv)
+	management.HarvesterNetworkFactory = harvesterNetwork
+	management.starters = append(management.starters, harvesterNetwork)
 
 	core, err := ctlcore.NewFactoryFromConfigWithOptions(restConfig, opts)
 	if err != nil {

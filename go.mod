@@ -25,7 +25,6 @@ require (
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v0.0.0-20200331171230-d50e42f2b669
 	github.com/rancher/harvester v0.1.0
 	github.com/rancher/lasso v0.0.0-20200515155337-a34e1e26ad91
-	github.com/rancher/steve v0.0.0-20200622175150-3dbc369174fb
 	github.com/rancher/wrangler v0.6.2-0.20200622171942-7224e49a2407
 	github.com/rancher/wrangler-api v0.6.1-0.20200515193802-dcf70881b087
 	github.com/sirupsen/logrus v1.6.0
@@ -37,4 +36,5 @@ require (
 	k8s.io/apimachinery v0.19.0-rc.2
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/klog v1.0.0
+	k8s.io/utils v0.0.0-20200720150651-0bdb4ca86cbc
 )

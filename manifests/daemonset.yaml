@@ -28,6 +28,8 @@ spec:
         - name: network
           image: rancher/harvester-network-controller:master-head
           imagePullPolicy: Always
+          command:
+            - harvester-network-controller
           args:
             - agent
           securityContext:

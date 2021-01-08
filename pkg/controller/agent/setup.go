@@ -1,12 +1,10 @@
-package daemonset
+package agent
 
 import (
 	"github.com/rancher/harvester-network-controller/pkg/config"
-	"github.com/rancher/harvester-network-controller/pkg/controller/daemonset/hostnetwork"
-	"github.com/rancher/harvester-network-controller/pkg/controller/daemonset/nad"
+	"github.com/rancher/harvester-network-controller/pkg/controller/agent/nad"
 )
 
 var RegisterFuncList = []config.RegisterFunc{
-	hostnetwork.Register,
 	nad.Register,
 }

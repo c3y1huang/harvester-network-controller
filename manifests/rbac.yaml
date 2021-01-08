@@ -13,14 +13,17 @@ kind: ClusterRole
 metadata:
   name: harvester-network-controller
 rules:
+  - apiGroups: [ "network.harvester.cattle.io" ]
+    resources: [ "hostnetworks" ]
+    verbs: [ "get", "watch", "list", "update", "create" ]
   - apiGroups: ["harvester.cattle.io"]
-    resources: ["settings", "hosts"]
+    resources: ["settings"]
     verbs: ["get", "watch", "list", "update", "create"]
   - apiGroups: ["k8s.cni.cncf.io"]
     resources: ["network-attachment-definitions"]
     verbs: ["get", "watch", "list", "update"]
   - apiGroups: [ "" ]
-    resources: [ "nodes" ]
+    resources: [ "nodes", "configmaps" ]
     verbs: [ "get", "watch", "list", "update" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
